@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DoctorSoftware" default="create-exe" basedir=".">
+    <!-- Define project properties -->
+    <property environment="env"/>
+    <property name="app.name" value="DoctorSoftware"/>
+    <property name="main.class" value="doctor.software.DoctorSoftware"/>
+    <property name="launch4j.dir" value="C:/Program Files (x86)/Launch4j"/>
+    
+    <!-- Define project directories -->
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="jdk.dir" value="jdk"/>
+    
+    <!-- Create executable jar with dependencies -->
+    <target name="create-jar">
+        <!-- Clean and create directories -->
+        <delete dir="${dist.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        
+        <!-- Compile the project -->
+        <javac srcdir="${src.dir}" 
+               destdir="${build.dir}"
+               includeantruntime="false"
+               debug="true">
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+        
+        <!-- Create JAR file -->
+        <jar destfile="${dist.dir}/${app.name}.jar">
+            <!-- Include compiled classes -->
+            <fileset dir="${build.dir}"/>
+            
+            <!-- Include dependencies -->
+            <zipgroupfileset dir="${lib.dir}" includes="**/*.jar"/>
+            
+            <!-- Include database file -->
+            <fileset file="new_database.db"/>
+            
+            <!-- Define manifest -->
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+    </target>
+    
+    <!-- Create Windows executable -->
+    <target name="create-exe" depends="create-jar">
+        <!-- Use Launch4j to create executable -->
+        <taskdef name="launch4j"
+                 classname="net.sf.launch4j.ant.Launch4jTask"
+                 classpath="${launch4j.dir}/launch4j.jar;${launch4j.dir}/lib/xstream.jar"/>
+        
+        <launch4j>
+            <config headerType="gui" 
+                    jar="${dist.dir}/${app.name}.jar"
+                    outfile="${dist.dir}/${app.name}.exe"
+                    errTitle="${app.name}"
+                    chdir="."
+                    priority="normal">
+                <jre minVersion="1.8.0"
+                     path="./jdk">
+                    <opt>-Xms128m -Xmx512m</opt>
+                </jre>
+                <versionInfo fileVersion="1.0.0.0"
+                            txtFileVersion="1.0.0.0"
+                            fileDescription="${app.name}"
+                            copyright="Your Copyright"
+                            productVersion="1.0.0.0"
+                            txtProductVersion="1.0.0.0"
+                            productName="${app.name}"
+                            internalName="${app.name}"
+                            originalFilename="${app.name}.exe"/>
+            </config>
+        </launch4j>
+    </target>
+</project>
